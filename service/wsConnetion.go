@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"socket/util"
 	"sync"
 )
 
@@ -68,7 +69,7 @@ func (conn *Connection) WriteMessageFromChan() error {
 		err = conn.wsConn.WriteMessage(websocket.TextMessage,data)
 		if err != nil {
 			//推送数据失败，标记连接关闭
-			fmt.Printf("推送数据失败：%v\n",err.Error())
+			util.Error(fmt.Sprintf("推送数据失败：%v\n",err.Error()))
 			conn.Close()
 			break
 		}

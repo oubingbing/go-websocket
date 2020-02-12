@@ -16,12 +16,14 @@ func GetTokenData(r *http.Request) (string,error) {
 	if len(token) <= 0 {
 		token = r.FormValue("token")
 		if len(token) <= 0 {
+			util.Error(fmt.Sprintf("token缺失：%v\n",token))
 			return "",errors.New("token缺失")
 		}
 	}else{
 		tokenSlice := strings.Split(token," ")
 		token = tokenSlice[1]
 		if len(token) <= 0 {
+			util.Error(fmt.Sprintf("token缺失：%v\n",token))
 			return "",errors.New("token缺失")
 		}
 	}

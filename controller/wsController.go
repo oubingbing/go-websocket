@@ -85,7 +85,7 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 	jsonData := util.Json(201,"连接成功",nil)
 	err = ws.GlobalSocket.ClientConnMap[clientId].PushToChan(jsonData)
 	if err != nil {
-		fmt.Printf("推送消息错误：%v\n",err.Error())
+		util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
 	}
 }
 
@@ -107,6 +107,7 @@ func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
 
 	socketConn,ok := ws.GlobalSocket.ClientConnMap[clientId]
 	if !ok {
+		util.Error(fmt.Sprintf("客户端不存在：%v\n",clientId))
 		util.ResponseJson(w,507,"客户端不存在",nil)
 		return
 	}
@@ -114,6 +115,7 @@ func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
 	jsonData := util.Json(http.StatusOK,"服务端消息推送",data)
 	err = socketConn.PushToChan(jsonData)
 	if err != nil {
+		util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
 		util.ResponseJson(w,508,"推送失败",nil)
 		return
 	}
