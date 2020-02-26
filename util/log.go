@@ -36,10 +36,11 @@ func Error(info string)  {
 
 func getFile() (*os.File,error) {
 	log.Out = os.Stdout
-	logDirPath := "./log"
+	dir, _ := os.Getwd()
+	logDirPath := dir+"/log"
 
 	if !isExistDir(logDirPath){
-		mkdirErr := os.Mkdir("./log",0777)
+		mkdirErr := os.Mkdir(dir,0777)
 		if mkdirErr != nil {
 			fmt.Printf("创建日志目录失败：%v\n",mkdirErr.Error())
 		}
