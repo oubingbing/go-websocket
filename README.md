@@ -75,7 +75,7 @@
 
 |参数名|必选|类型|说明|
 |:----    |:---|:----- |-----   |
-|sign |是  |string |后端返回的token,aes-128-ecb对称加密字符串|
+|sign |是  |string |后端返回的token,aes-128-ecb对称加密字符串，签名密钥可在config.ini中key_sign处修改|
 
 
  **返回示例**
