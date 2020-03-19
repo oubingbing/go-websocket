@@ -1,3 +1,4 @@
 /socket.*
 /socket
 .idea
+/log/*[!*.txt]

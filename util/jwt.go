@@ -6,9 +6,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-//签名密钥
-var secretKey  []byte = []byte("xknMuxhMhv1dqvxnDKn3AHzw5HeV8G7E/HZrESxiY7M=")
-
 type Jwt struct {
 	Email interface{}
 	secretKey []byte
@@ -19,7 +16,11 @@ type Jwt struct {
  * 解析token
  */
 func (this *Jwt) ParseToken() (error) {
-	this.secretKey = secretKey
+	var configErr error
+	this.secretKey,configErr = GetSignKey()
+	if configErr != nil {
+		return  configErr
+	}
 	tokenPoint,err := jwt.Parse(this.Token, func(token *jwt.Token) (i interface{}, e error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			Error(fmt.Sprintf("Unexpected signing method: %v", token.Header["alg"]))
@@ -45,7 +46,11 @@ func (this *Jwt) ParseToken() (error) {
  * 创建token
  */
 func (this *Jwt) CreateToken() (error) {
-	this.secretKey = secretKey
+	var configErr error
+	this.secretKey,configErr = GetSignKey()
+	if configErr != nil {
+		return  configErr
+	}
 
 	//可以在里面自定义自己需要传输的信息，不要存放机密信息，如密码之类的信息
 	type MyCustomClaims struct {

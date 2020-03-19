@@ -9,4 +9,5 @@ require (
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/wumansgy/goEncrypt v0.0.0-20190822060801-cf9a6f8787e4
+	gopkg.in/ini.v1 v1.55.0
 )

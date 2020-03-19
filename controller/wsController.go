@@ -18,26 +18,30 @@ type Ws struct {
  */
 func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 	if r.Method != "POST" {
-		util.ResponseJson(w,502,"method error",nil)
+		util.Error(fmt.Sprintf("ethod error-5002"))
+		util.ResponseJson(w,500,"method error",nil)
 		return
 	}
 
 	encryptString := r.PostFormValue("sign")
 	key := []byte("7yY2tYZdPuNSBVU9")
 	if len(encryptString) <= 0 {
-		util.ResponseJson(w,503,"签名错误",nil)
+		util.Error(fmt.Sprintf("签名错误-5003"))
+		util.ResponseJson(w,500,"签名错误",nil)
 		return
 	}
 
 	base64Decode,base64Err:= base64.StdEncoding.DecodeString(encryptString)
 	if base64Err != nil {
-		util.ResponseJson(w,501,"签名错误",nil)
+		util.Error(fmt.Sprintf("签名错误-5001"))
+		util.ResponseJson(w,500,"签名错误",nil)
 		return
 	}
 
 	decryptCode,decodeErr := util.AesDecryptECB(base64Decode, key)
 	if decodeErr != nil {
-		util.ResponseJson(w,502,"签名错误",nil)
+		util.Error(fmt.Sprintf("签名错误-5002"))
+		util.ResponseJson(w,500,"签名错误",nil)
 		return
 	}
 
@@ -46,8 +50,8 @@ func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 	jwt.Email = decryptCode
 	err := jwt.CreateToken()
 	if err != nil{
-		util.Error(fmt.Sprintf("创建token失败：%v\n",err.Error()))
-		util.ResponseJson(w,504,"签名错误",nil)
+		util.Error(fmt.Sprintf("创建token失败-5004：%v\n",err.Error()))
+		util.ResponseJson(w,500,"签名错误",nil)
 		return
 	}
 
@@ -60,7 +64,8 @@ func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 	clientId,err := service.GetTokenData(r)
 	if err != nil {
-		util.ResponseJson(w,505,err.Error(),nil)
+		util.Error(fmt.Sprintf("获取token信息失败-5005：%v\n",err.Error()))
+		util.ResponseJson(w,500,err.Error(),nil)
 		fmt.Println(err.Error())
 		return
 	}
@@ -74,6 +79,7 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 	wsConn,err := upgrader.Upgrade(w,r,nil)
 	if err != nil{
 		//连接错误
+		util.Error(fmt.Sprintf("升级协议失败：%v\n",err.Error()))
 		fmt.Printf("升级协议失败：%v\n",err)
 		return
 	}
@@ -94,21 +100,21 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
  */
 func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
 	if r.Method != "POST" {
-		util.ResponseJson(w,502,"method error",nil)
+		util.ResponseJson(w,500,"method error",nil)
 		return
 	}
 
 	data := r.PostFormValue("message")
 	clientId,err := service.GetTokenData(r)
 	if err != nil {
-		util.ResponseJson(w,506,"无权访问",nil)
+		util.ResponseJson(w,500,"无权访问",nil)
 		return
 	}
 
 	socketConn,ok := ws.GlobalSocket.ClientConnMap[clientId]
 	if !ok {
 		util.Error(fmt.Sprintf("客户端不存在：%v\n",clientId))
-		util.ResponseJson(w,507,"客户端不存在",nil)
+		util.ResponseJson(w,500,"客户端不存在",nil)
 		return
 	}
 
@@ -116,7 +122,7 @@ func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
 	err = socketConn.PushToChan(jsonData)
 	if err != nil {
 		util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
-		util.ResponseJson(w,508,"推送失败",nil)
+		util.ResponseJson(w,500,"推送失败",nil)
 		return
 	}
 
