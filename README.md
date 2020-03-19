@@ -11,7 +11,7 @@
 	go version
 
 ### 二、拉取代码
-发布地址：ssh://git@git.galaxymx.com:22333/zypt/websocket.git (git pull)
+发布地址：https://github.com/oubingbing/go-websokcet.git (git pull)
 发布分支： master
 发布备注：
 
@@ -38,17 +38,17 @@
 ### 六、配置nginx
 参考配置
 
-	[root@txy-op-elk-05 conf.d]# vim socket.galaxymx.com.conf
+	[root@txy-op-elk-05 conf.d]# vim socket.domain.com.conf
 	server {
 		listen  80;
-		server_name   socket.galaxymx.com;
+		server_name   socket.domain.com;
 	
 		charset    utf-8;
 		default_type 'text/html';
 		client_max_body_size 4G;
 	
-		error_log /data/logs/nginx/socket.galaxymx.com.error.log;
-		access_log /data/logs/nginx/socket.galaxymx.com.access.log;
+		error_log /data/logs/nginx/socket.domain.com.error.log;
+		access_log /data/logs/nginx/socket.domain.com.access.log;
 		index index.php index.html;
 	
 		location / {
@@ -83,7 +83,8 @@
 ```
 {
     "code":200,
-    "message":"授权成功",		"data":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IloxOHpYMkZmTVE9PSIsImV4cCI6MTU4MTQ5NTgyOX0.fUUvADIm7otda4Z58fq1PIgcXnzBGhx6_ERDBBQjYKc",
+    "message":"授权成功",		
+    "data":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IloxOHpYMkZmTVE9PSIsImV4cCI6MTU4MTQ5NTgyOX0.fUUvADIm7otda4Z58fq1PIgcXnzBGhx6_ERDBBQjYKc",
     "contact_email":"875307054@qq.com"
 }
 ```
