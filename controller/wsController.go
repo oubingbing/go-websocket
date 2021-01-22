@@ -23,15 +23,15 @@ func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	encryptString := r.PostFormValue("sign")
+	encryptString,ok:= util.Input(r,"sign")
 	key := []byte("7yY2tYZdPuNSBVU9")
-	if len(encryptString) <= 0 {
+	if !ok {
 		util.Error(fmt.Sprintf("签名错误-5003"))
 		util.ResponseJson(w,500,"签名错误",nil)
 		return
 	}
 
-	base64Decode,base64Err:= base64.StdEncoding.DecodeString(encryptString)
+	base64Decode,base64Err:= base64.StdEncoding.DecodeString(encryptString.(string))
 	if base64Err != nil {
 		util.Error(fmt.Sprintf("签名错误-5001"))
 		util.ResponseJson(w,500,"签名错误",nil)

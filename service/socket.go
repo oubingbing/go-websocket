@@ -34,6 +34,6 @@ func (socket *GlobalSocket) Heartbeat()  {
 		time.Sleep(30*time.Second)
 
 		//检测客户端连接数
-		fmt.Printf("客户端连接数：%v\n",socket.CountClient())
+		util.Info(fmt.Sprintf("客户端连接数：%v\n",socket.CountClient()))
 	}
 }
