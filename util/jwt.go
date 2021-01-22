@@ -10,6 +10,7 @@ type Jwt struct {
 	Email interface{}
 	secretKey []byte
 	Token string
+	Exp int64
 }
 
 /**
@@ -58,13 +59,15 @@ func (this *Jwt) CreateToken() (error) {
 		jwt.StandardClaims
 	}
 
+	exp := time.Now().Unix()+(3600*24)
 	claims := MyCustomClaims{
 		this.Email,
 		jwt.StandardClaims{
-			ExpiresAt:time.Now().Unix()+(3600*24),//过期时间，一个小时
+			ExpiresAt:exp,//过期时间，一天
 		},
 	}
 
+	this.Exp = exp
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,claims)//指定签名方法
 	tokenString,err := token.SignedString(this.secretKey)
 	if err != nil{

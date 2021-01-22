@@ -55,7 +55,10 @@ func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	util.ResponseJson(w,200,"授权成功",jwt.Token)
+	mp := make(map[string]interface{})
+	mp["token"] = jwt.Token
+	mp["expire"] = jwt.Exp
+	util.ResponseJson(w,200,"授权成功",mp)
 }
 
 /**
@@ -66,7 +69,6 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 	if err != nil {
 		util.Error(fmt.Sprintf("获取token信息失败-5005：%v\n",err.Error()))
 		util.ResponseJson(w,500,err.Error(),nil)
-		fmt.Println(err.Error())
 		return
 	}
 
@@ -80,7 +82,6 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 	if err != nil{
 		//连接错误
 		util.Error(fmt.Sprintf("升级协议失败：%v\n",err.Error()))
-		fmt.Printf("升级协议失败：%v\n",err)
 		return
 	}
 
@@ -104,7 +105,12 @@ func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
 		return
 	}
 
-	data := r.PostFormValue("message")
+	data,ok := util.Input(r,"message")
+	if !ok {
+		util.ResponseJson(w,500,"message不能为空",nil)
+		return
+	}
+
 	clientId,err := service.GetTokenData(r)
 	if err != nil {
 		util.ResponseJson(w,500,"无权访问",nil)
