@@ -7,7 +7,7 @@ import (
 )
 
 func Init()  {
-	globalSocket := &service.GlobalSocket{make(map[string]*service.Connection)}
+	globalSocket := &service.GlobalSocket{make(map[string][]*service.Connection)}
 	go globalSocket.Heartbeat()
 
 	ws := &controller.Ws{GlobalSocket:globalSocket}

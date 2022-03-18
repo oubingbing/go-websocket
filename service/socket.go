@@ -7,7 +7,7 @@ import (
 )
 
 type GlobalSocket struct {
-	ClientConnMap map[string]*Connection
+	ClientConnMap map[string][]*Connection
 }
 
 /**
@@ -20,20 +20,29 @@ func (socket *GlobalSocket) CountClient() int {
 /*
  * 检测心跳
  */
-func (socket *GlobalSocket) Heartbeat()  {
-	for{
-		for _,conn := range socket.ClientConnMap {
+func (socket *GlobalSocket) Heartbeat() {
+	for {
+		for i, conn := range socket.ClientConnMap {
 
-			jsonData := util.Json(201,"heartbeat",nil)
-			if err := conn.PushToChan(jsonData);err != nil{
-				//客户端断开连接
-				delete(socket.ClientConnMap,conn.clientId)
+			newArr := []*Connection{}
+			jsonData := util.Json(201, "heartbeat", nil)
+			for _, item := range conn {
+				if err := item.PushToChan(jsonData); err == nil {
+					//没有回应的客户端会被清除
+					newArr = append(newArr, item)
+				}
+			}
+			if len(newArr) <= 0 {
+				//把所有连接删除
+				delete(socket.ClientConnMap, i)
+			} else {
+				socket.ClientConnMap[i] = newArr
 			}
 		}
 
-		time.Sleep(30*time.Second)
+		time.Sleep(10 * time.Second)
 
 		//检测客户端连接数
-		util.Info(fmt.Sprintf("客户端连接数：%v\n",socket.CountClient()))
+		util.Info(fmt.Sprintf("客户端连接数：%v\n", socket.CountClient()))
 	}
 }

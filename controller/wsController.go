@@ -24,7 +24,7 @@ func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	encryptString,ok:= util.Input(r,"sign")
-	key := []byte("7yY2tYZdPuNSBVU9")
+	key,_ := util.GetSignKey()
 	if !ok {
 		util.Error(fmt.Sprintf("签名错误-5003"))
 		util.ResponseJson(w,500,"签名错误",nil)
@@ -87,12 +87,15 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 
 	var clientConn *service.Connection
 	clientConn = service.InitConnect(wsConn,clientId)
-	ws.GlobalSocket.ClientConnMap[clientId] = clientConn
+	ws.GlobalSocket.ClientConnMap[clientId] = append(ws.GlobalSocket.ClientConnMap[clientId], clientConn)
+	//ws.GlobalSocket.ClientConnMap[clientId] = clientConn
 
 	jsonData := util.Json(201,"连接成功",nil)
-	err = ws.GlobalSocket.ClientConnMap[clientId].PushToChan(jsonData)
-	if err != nil {
-		util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
+	for _,item := range ws.GlobalSocket.ClientConnMap[clientId] {
+		err = item.PushToChan(jsonData)
+		if err != nil {
+			util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
+		}
 	}
 }
 
@@ -125,11 +128,13 @@ func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
 	}
 
 	jsonData := util.Json(http.StatusOK,"服务端消息推送",data)
-	err = socketConn.PushToChan(jsonData)
-	if err != nil {
-		util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
-		util.ResponseJson(w,500,"推送失败",nil)
-		return
+	for _,item := range socketConn {
+		err = item.PushToChan(jsonData)
+		if err != nil {
+			util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
+			util.ResponseJson(w,500,"推送失败",nil)
+			return
+		}
 	}
 
 	util.ResponseJson(w,200,"推送成功",nil)

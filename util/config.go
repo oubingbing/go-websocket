@@ -15,5 +15,5 @@ func GetSignKey() ( []byte,error) {
 		return nil,err
 	}
 
-	return []byte(cfg.Section("").Key("key_sign").String()),nil
+	return []byte(cfg.Section("key").Key("KEY_SIGN").String()),nil
 }

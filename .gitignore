@@ -2,3 +2,4 @@
 /socket
 .idea
 /log/*[!*.txt]
+config.ini

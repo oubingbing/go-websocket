@@ -59,7 +59,7 @@ func (this *Jwt) CreateToken() (error) {
 		jwt.StandardClaims
 	}
 
-	exp := time.Now().Unix()+(3600*24)
+	exp := time.Now().Unix()+(3600*24*3)
 	claims := MyCustomClaims{
 		this.Email,
 		jwt.StandardClaims{

@@ -10,7 +10,6 @@ type Response struct {
 	ErrorCode int `json:"code"`
 	ErrorMessage string `json:"message"`
 	Data interface{} `json:"data"`
-	AuthorEmail string `json:"contact_email"`
 }
 
 func (r *Response) ResponseError() ([]byte,error) {
@@ -34,7 +33,6 @@ func ResponseJson(w http.ResponseWriter,code int,message string,data interface{}
 	res.ErrorCode = code
 	res.ErrorMessage = message
 	res.Data = data
-	res.AuthorEmail = "875307054@qq.com"
 
 	if code != http.StatusOK {
 		json,err = res.ResponseError()
@@ -58,7 +56,6 @@ func Json(code int,message string,data interface{}) ([]byte) {
 	res.ErrorCode = code
 	res.ErrorMessage = message
 	res.Data = data
-	res.AuthorEmail = "875307054@qq.com"
 
 	json,err = res.ResponseSuccess()
 
