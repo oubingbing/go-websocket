@@ -19,10 +19,10 @@ func generateKey(key []byte) (genKey []byte) {
 /**
  * 解密
  */
-func AesDecryptECB(encrypted []byte, key []byte) ([]byte,error) {
+func AesDecryptECB(encrypted []byte, key []byte) ([]byte, error) {
 	cipher, err := aes.NewCipher(generateKey(key))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	decrypted := make([]byte, len(encrypted))
@@ -36,19 +36,19 @@ func AesDecryptECB(encrypted []byte, key []byte) ([]byte,error) {
 	}
 
 	if trim < 0 {
-		return nil,errors.New("解密失败")
+		return nil, errors.New("解密失败")
 	}
 
-	return decrypted[:trim],nil
+	return decrypted[:trim], nil
 }
 
 /**
  * 加密
  */
-func AesEncryptECB(origData []byte, key []byte) ([]byte,error) {
+func AesEncryptECB(origData []byte, key []byte) ([]byte, error) {
 	cipher, err := aes.NewCipher(generateKey(key))
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	length := (len(origData) + aes.BlockSize) / aes.BlockSize
@@ -64,5 +64,5 @@ func AesEncryptECB(origData []byte, key []byte) ([]byte,error) {
 		cipher.Encrypt(encrypted[bs:be], plain[bs:be])
 	}
 
-	return encrypted,nil
+	return encrypted, nil
 }

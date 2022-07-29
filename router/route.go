@@ -6,13 +6,13 @@ import (
 	"socket/service"
 )
 
-func Init()  {
+func Init() {
 	globalSocket := &service.GlobalSocket{make(map[string][]*service.Connection)}
 	go globalSocket.Heartbeat()
 
-	ws := &controller.Ws{GlobalSocket:globalSocket}
+	ws := &controller.Ws{GlobalSocket: globalSocket}
 
-	http.HandleFunc("/auth",ws.Auth)
+	http.HandleFunc("/auth", ws.Auth)
 	//升级协议
 	http.HandleFunc("/ws", ws.UpGrad)
 	//推送消息

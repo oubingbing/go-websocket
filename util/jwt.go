@@ -2,27 +2,27 @@ package util
 
 import (
 	"fmt"
-	"time"
 	"github.com/dgrijalva/jwt-go"
+	"time"
 )
 
 type Jwt struct {
-	Email interface{}
+	Email     interface{}
 	secretKey []byte
-	Token string
-	Exp int64
+	Token     string
+	Exp       int64
 }
 
 /**
  * 解析token
  */
-func (this *Jwt) ParseToken() (error) {
+func (this *Jwt) ParseToken() error {
 	var configErr error
-	this.secretKey,configErr = GetSignKey()
+	this.secretKey, configErr = GetSignKey()
 	if configErr != nil {
-		return  configErr
+		return configErr
 	}
-	tokenPoint,err := jwt.Parse(this.Token, func(token *jwt.Token) (i interface{}, e error) {
+	tokenPoint, err := jwt.Parse(this.Token, func(token *jwt.Token) (i interface{}, e error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			Error(fmt.Sprintf("Unexpected signing method: %v", token.Header["alg"]))
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -31,7 +31,7 @@ func (this *Jwt) ParseToken() (error) {
 		return this.secretKey, nil
 	})
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -39,40 +39,40 @@ func (this *Jwt) ParseToken() (error) {
 		this.Email = c["email"]
 		return nil
 	} else {
-		return  err
+		return err
 	}
 }
 
 /**
  * 创建token
  */
-func (this *Jwt) CreateToken() (error) {
+func (this *Jwt) CreateToken() error {
 	var configErr error
-	this.secretKey,configErr = GetSignKey()
+	this.secretKey, configErr = GetSignKey()
 	if configErr != nil {
-		return  configErr
+		return configErr
 	}
 
 	//可以在里面自定义自己需要传输的信息，不要存放机密信息，如密码之类的信息
 	type MyCustomClaims struct {
-		Email interface{} `json:"email"`//邮箱，用邮箱标记用户信息
+		Email interface{} `json:"email"` //邮箱，用邮箱标记用户信息
 		jwt.StandardClaims
 	}
 
-	exp := time.Now().Unix()+(3600*24*3)
+	exp := time.Now().Unix() + (3600 * 24 * 3)
 	claims := MyCustomClaims{
 		this.Email,
 		jwt.StandardClaims{
-			ExpiresAt:exp,//过期时间，一天
+			ExpiresAt: exp, //过期时间，一天
 		},
 	}
 
 	this.Exp = exp
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,claims)//指定签名方法
-	tokenString,err := token.SignedString(this.secretKey)
-	if err != nil{
-		return  err
-	}else{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) //指定签名方法
+	tokenString, err := token.SignedString(this.secretKey)
+	if err != nil {
+		return err
+	} else {
 		this.Token = tokenString
 		return nil
 	}

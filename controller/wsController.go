@@ -16,32 +16,32 @@ type Ws struct {
 /**
  * 授权，需要进行签名校验
  */
-func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
+func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		util.Error(fmt.Sprintf("ethod error-5002"))
-		util.ResponseJson(w,500,"method error",nil)
+		util.ResponseJson(w, 500, "method error", nil)
 		return
 	}
 
-	encryptString,ok:= util.Input(r,"sign")
-	key,_ := util.GetSignKey()
+	encryptString, ok := util.Input(r, "sign")
+	key, _ := util.GetSignKey()
 	if !ok {
 		util.Error(fmt.Sprintf("签名错误-5003"))
-		util.ResponseJson(w,500,"签名错误",nil)
+		util.ResponseJson(w, 500, "签名错误", nil)
 		return
 	}
 
-	base64Decode,base64Err:= base64.StdEncoding.DecodeString(encryptString.(string))
+	base64Decode, base64Err := base64.StdEncoding.DecodeString(encryptString.(string))
 	if base64Err != nil {
 		util.Error(fmt.Sprintf("签名错误-5001"))
-		util.ResponseJson(w,500,"签名错误",nil)
+		util.ResponseJson(w, 500, "签名错误", nil)
 		return
 	}
 
-	decryptCode,decodeErr := util.AesDecryptECB(base64Decode, key)
+	decryptCode, decodeErr := util.AesDecryptECB(base64Decode, key)
 	if decodeErr != nil {
 		util.Error(fmt.Sprintf("签名错误-5002"))
-		util.ResponseJson(w,500,"签名错误",nil)
+		util.ResponseJson(w, 500, "签名错误", nil)
 		return
 	}
 
@@ -49,26 +49,26 @@ func (ws *Ws) Auth(w http.ResponseWriter, r *http.Request)  {
 	var jwt util.Jwt
 	jwt.Email = decryptCode
 	err := jwt.CreateToken()
-	if err != nil{
-		util.Error(fmt.Sprintf("创建token失败-5004：%v\n",err.Error()))
-		util.ResponseJson(w,500,"签名错误",nil)
+	if err != nil {
+		util.Error(fmt.Sprintf("创建token失败-5004：%v\n", err.Error()))
+		util.ResponseJson(w, 500, "签名错误", nil)
 		return
 	}
 
 	mp := make(map[string]interface{})
 	mp["token"] = jwt.Token
 	mp["expire"] = jwt.Exp
-	util.ResponseJson(w,200,"授权成功",mp)
+	util.ResponseJson(w, 200, "授权成功", mp)
 }
 
 /**
  * 处理协议升级
  */
-func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
-	clientId,err := service.GetTokenData(r)
+func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request) {
+	clientId, err := service.GetTokenData(r)
 	if err != nil {
-		util.Error(fmt.Sprintf("获取token信息失败-5005：%v\n",err.Error()))
-		util.ResponseJson(w,500,err.Error(),nil)
+		util.Error(fmt.Sprintf("获取token信息失败-5005：%v\n", err.Error()))
+		util.ResponseJson(w, 500, err.Error(), nil)
 		return
 	}
 
@@ -78,23 +78,23 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 		},
 	}
 
-	wsConn,err := upgrader.Upgrade(w,r,nil)
-	if err != nil{
+	wsConn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
 		//连接错误
-		util.Error(fmt.Sprintf("升级协议失败：%v\n",err.Error()))
+		util.Error(fmt.Sprintf("升级协议失败：%v\n", err.Error()))
 		return
 	}
 
 	var clientConn *service.Connection
-	clientConn = service.InitConnect(wsConn,clientId)
+	clientConn = service.InitConnect(wsConn, clientId)
 	ws.GlobalSocket.ClientConnMap[clientId] = append(ws.GlobalSocket.ClientConnMap[clientId], clientConn)
 	//ws.GlobalSocket.ClientConnMap[clientId] = clientConn
 
-	jsonData := util.Json(201,"连接成功",nil)
-	for _,item := range ws.GlobalSocket.ClientConnMap[clientId] {
+	jsonData := util.Json(201, "连接成功", nil)
+	for _, item := range ws.GlobalSocket.ClientConnMap[clientId] {
 		err = item.PushToChan(jsonData)
 		if err != nil {
-			util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
+			util.Error(fmt.Sprintf("推送消息错误：%v\n", err.Error()))
 		}
 	}
 }
@@ -102,41 +102,41 @@ func (ws *Ws) UpGrad(w http.ResponseWriter, r *http.Request)  {
 /**
  * 推送消息到指定客户端
  */
-func (ws *Ws) Push(w http.ResponseWriter, r *http.Request)  {
+func (ws *Ws) Push(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
-		util.ResponseJson(w,500,"method error",nil)
+		util.ResponseJson(w, 500, "method error", nil)
 		return
 	}
 
-	data,ok := util.Input(r,"message")
+	data, ok := util.Input(r, "message")
 	if !ok {
-		util.ResponseJson(w,500,"message不能为空",nil)
+		util.ResponseJson(w, 500, "message不能为空", nil)
 		return
 	}
 
-	clientId,err := service.GetTokenData(r)
+	clientId, err := service.GetTokenData(r)
 	if err != nil {
-		util.ResponseJson(w,500,"无权访问",nil)
+		util.ResponseJson(w, 500, "无权访问", nil)
 		return
 	}
 
-	socketConn,ok := ws.GlobalSocket.ClientConnMap[clientId]
+	socketConn, ok := ws.GlobalSocket.ClientConnMap[clientId]
 	if !ok {
-		util.Error(fmt.Sprintf("客户端不存在：%v\n",clientId))
-		util.ResponseJson(w,500,"客户端不存在",nil)
+		util.Error(fmt.Sprintf("客户端不存在：%v\n", clientId))
+		util.ResponseJson(w, 500, "客户端不存在", nil)
 		return
 	}
 
-	jsonData := util.Json(http.StatusOK,"服务端消息推送",data)
-	for _,item := range socketConn {
+	jsonData := util.Json(http.StatusOK, "服务端消息推送", data)
+	for _, item := range socketConn {
 		err = item.PushToChan(jsonData)
 		if err != nil {
-			util.Error(fmt.Sprintf("推送消息错误：%v\n",err.Error()))
-			util.ResponseJson(w,500,"推送失败",nil)
+			util.Error(fmt.Sprintf("推送消息错误：%v\n", err.Error()))
+			util.ResponseJson(w, 500, "推送失败", nil)
 			return
 		}
 	}
 
-	util.ResponseJson(w,200,"推送成功",nil)
+	util.ResponseJson(w, 200, "推送成功", nil)
 	return
 }

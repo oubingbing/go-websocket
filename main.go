@@ -6,7 +6,7 @@ import (
 	"socket/router"
 )
 
-func main()  {
+func main() {
 	router.Init()
 	fmt.Println("服务器启动成功")
 	http.ListenAndServe("localhost:8088", nil)

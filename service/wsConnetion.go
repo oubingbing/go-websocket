@@ -9,26 +9,26 @@ import (
 )
 
 type Connection struct {
-	wsConn *websocket.Conn
-	clientId string
-	inChan chan []byte
-	outChan chan []byte
+	wsConn    *websocket.Conn
+	clientId  string
+	inChan    chan []byte
+	outChan   chan []byte
 	closeChan chan byte
-	mutex sync.Mutex //对closeChan关闭上锁
-	isClosed bool  // 防止closeChan被关闭多次
+	mutex     sync.Mutex //对closeChan关闭上锁
+	isClosed  bool       // 防止closeChan被关闭多次
 }
 
 /**
  * 初始化连接
  */
-func InitConnect(wsConn *websocket.Conn,clientId string) (*Connection) {
+func InitConnect(wsConn *websocket.Conn, clientId string) *Connection {
 	conn := &Connection{
-		wsConn:wsConn,
-		clientId:clientId,
-		inChan:make(chan []byte,1000),
-		outChan:make(chan []byte,1000),
-		closeChan:make(chan byte,1),
-		isClosed:false,
+		wsConn:    wsConn,
+		clientId:  clientId,
+		inChan:    make(chan []byte, 1000),
+		outChan:   make(chan []byte, 1000),
+		closeChan: make(chan byte, 1),
+		isClosed:  false,
 	}
 
 	go conn.WriteMessageFromChan()
@@ -42,14 +42,14 @@ func InitConnect(wsConn *websocket.Conn,clientId string) (*Connection) {
 func (conn *Connection) PushToChan(data []byte) error {
 	var err error
 	select {
-		case conn.outChan <- data:
-		case <-conn.closeChan:
-			//关闭渠道和连接
-			conn.Close()
-			err = errors.New("连接已关闭")
+	case conn.outChan <- data:
+	case <-conn.closeChan:
+		//关闭渠道和连接
+		conn.Close()
+		err = errors.New("连接已关闭")
 	}
 
-	return  err
+	return err
 }
 
 /**
@@ -61,15 +61,15 @@ func (conn *Connection) WriteMessageFromChan() error {
 	var err error
 	for {
 		select {
-			case data = <-conn.outChan:
-			case <- conn.closeChan:
-				//渠道关闭，关闭所有渠道
-				conn.Close()
+		case data = <-conn.outChan:
+		case <-conn.closeChan:
+			//渠道关闭，关闭所有渠道
+			conn.Close()
 		}
-		err = conn.wsConn.WriteMessage(websocket.TextMessage,data)
+		err = conn.wsConn.WriteMessage(websocket.TextMessage, data)
 		if err != nil {
 			//推送数据失败，标记连接关闭
-			util.Error(fmt.Sprintf("推送数据失败：%v\n",err.Error()))
+			util.Error(fmt.Sprintf("推送数据失败：%v\n", err.Error()))
 			conn.Close()
 			break
 		}
@@ -81,7 +81,7 @@ func (conn *Connection) WriteMessageFromChan() error {
 /**
  * 关闭长连接
  */
-func (conn *Connection) Close()  {
+func (conn *Connection) Close() {
 	conn.wsConn.Close()
 
 	conn.mutex.Lock()
